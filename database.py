@@ -17,10 +17,16 @@ def scoring(duration: float,media_type: str):
         "manga":"reading"
     }
 
-    category_multipliers = {
-        "listening":5,
-        "reading":3,
+    default_multipliers = {
+        "listening":1,
+        "reading":1,
         "anki":2
+    }
+
+    uranai_multipliers = {
+        "listening":None,
+        "reading": None,
+        "anki": None
     }
 
     for key in media_tags:
@@ -28,13 +34,17 @@ def scoring(duration: float,media_type: str):
             print(f"{key}:{media_tags[key]}")
             type = media_tags[key]
 
-            for category in category_multipliers:
+            for category in default_multipliers:
                 if type == category:
-                    multiplier = category_multipliers[category]
+                    multiplier = default_multipliers[category]
                     modified_points = unmodified_earned_points * multiplier
                     print(f"the multiplier is {multiplier}x")
                     print(f"points earned: {modified_points}")
-    #print(earned_points)
+
+                    
+
+def uranai_multipliers():
+    pass
 
 
 def db_connection():
@@ -88,12 +98,10 @@ def insert_into_table(media_type:str, title:str, duration:float, details:str, li
     conn.commit()
 
 def main():
-    args = ('media_type', 'title', 'duration', 'detail', 'date', 'link', 'notes')
     conn, c = db_connection()
     create_table()
     conn.close()
     #close the cursor/closes the db connection
-    scoring(10.0,"vn")
 
 if __name__ == "__main__":
     main()

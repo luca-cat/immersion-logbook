@@ -1,6 +1,6 @@
 import typer
 from typing import Optional
-from database import insert_into_table, display_logs, log_deletion
+from database import insert_into_table, display_logs, log_deletion, scoring
 from tablecreation import print_table
 
 app = typer.Typer()
@@ -25,8 +25,12 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
 
         insert_into_table(media_type, title, duration, details, link, notes)
         print(f"logged {media_type} {title} {detail_str}{duration}m{notes_str}. {link_str}")
+        
+        scoring(duration, media_type)
 
-        print("points earned:")
+@app.command()
+def setup():
+    pass
 
 @app.command()
 def show_table():
