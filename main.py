@@ -26,6 +26,7 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         insert_into_table(media_type, title, duration, details, link, notes)
         print(f"logged {media_type} {title} {detail_str}{duration}m{notes_str}. {link_str}")
 
+        print("points earned:")
 
 @app.command()
 def show_table():

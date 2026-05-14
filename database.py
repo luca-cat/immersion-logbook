@@ -3,9 +3,9 @@ import os
 import sqlite3
 from datetime import datetime
 
-def scoring(duration: float):
+def scoring(duration: float,media_type: str):
     points_per_minute = 1/30
-    earned_points = points_per_minute * duration
+    unmodified_earned_points = points_per_minute * duration
     
     media_tags = {
         "youtube":"listening",
@@ -18,11 +18,22 @@ def scoring(duration: float):
     }
 
     category_multipliers = {
-        "listening":1,
-        "reading":1,
+        "listening":5,
+        "reading":3,
         "anki":2
     }
 
+    for key in media_tags:
+        if media_type == key:
+            print(f"{key}:{media_tags[key]}")
+            type = media_tags[key]
+
+            for category in category_multipliers:
+                if type == category:
+                    multiplier = category_multipliers[category]
+                    modified_points = unmodified_earned_points * multiplier
+                    print(f"the multiplier is {multiplier}x")
+                    print(f"points earned: {modified_points}")
     #print(earned_points)
 
 
@@ -82,6 +93,7 @@ def main():
     create_table()
     conn.close()
     #close the cursor/closes the db connection
+    scoring(10.0,"vn")
 
 if __name__ == "__main__":
     main()
