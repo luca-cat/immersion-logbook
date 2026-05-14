@@ -3,6 +3,29 @@ import os
 import sqlite3
 from datetime import datetime
 
+def scoring(duration: float):
+    points_per_minute = 1/30
+    earned_points = points_per_minute * duration
+    
+    media_tags = {
+        "youtube":"listening",
+        "movie":"listening",
+        "anime":"listening",
+        "drama":"listening",
+        "ln":"reading",
+        "vn":"reading",
+        "manga":"reading"
+    }
+
+    category_multipliers = {
+        "listening":1,
+        "reading":1,
+        "anki":2
+    }
+
+    #print(earned_points)
+
+
 def db_connection():
     load_dotenv()
     DB_PATH = os.getenv("DB_PATH")

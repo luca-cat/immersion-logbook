@@ -4,16 +4,27 @@ from database import insert_into_table, display_logs, log_deletion
 from tablecreation import print_table
 
 app = typer.Typer()
-#allows for -h to be used as a help alias
+
+MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "ln", "vn", "manga")
 
 @app.command()
 def log(media_type: str, title: str, duration: float, notes: Optional[str] = None, details: Optional[str] = None, link: Optional[str] = None):
-    detail_str = f"{details} " if details else ""
-    notes_str = f":{notes}" if notes else ""
-    link_str = f"{link} if" if link else ""
-    #if notes contains a value then notes_str equal to string, else it equals none
-    insert_into_table(media_type, title, duration, details, link, notes)
-    print(f"logged {media_type} {title} {detail_str}{duration}m{notes_str}. {link_str}")
+    
+    if media_type not in MEDIA_TYPES:
+        print("not a valid media type")
+        print(MEDIA_TYPES)
+    
+    else: 
+
+        detail_str = f"{details} " if details else ""
+        notes_str = f":{notes}" if notes else ""
+        link_str = f"{link} if" if link else ""
+        #if notes contains a value then notes_str equal to string, else it equals none
+        
+        media_type, title, details, notes = map(str.lower,[media_type,title,details,notes])
+
+        insert_into_table(media_type, title, duration, details, link, notes)
+        print(f"logged {media_type} {title} {detail_str}{duration}m{notes_str}. {link_str}")
 
 
 @app.command()
