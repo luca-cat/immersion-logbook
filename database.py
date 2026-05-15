@@ -58,12 +58,14 @@ def scoring(duration: float,media_type: str):
                         print(f"therefore the new multiplier is {new_multiplier}x")
                         print(f"points earned: {modified_points:.2f}points")
                         #prints points as two decimal places as it makes output cleaner
+                        return modified_points
                 else:
                     if type == category:
                         multiplier = default_multipliers[category]
                         modified_points = unmodified_earned_points * multiplier
                         print(f"the multiplier is {multiplier}x")
                         print(f"points earned: {modified_points:.2f}points")
+                        return modified_points
                             
                     
 
@@ -88,9 +90,15 @@ def create_table():
     conn, c = db_connection()
     #create table
     c.execute('''create table if not exists immersion
-    (id integer primary key autoincrement, media_type text, title text, duration real, detail text, date text, link text, notes text)''')
+    (id integer primary key autoincrement, media_type text not null, title text not null, duration real not null, detail text null, date text not null, link text null, notes text null)''')
     #commits changes//saves changes
     conn.commit()
+
+def create_points_table():
+    conn, c = db_connection()
+    c.execute('PRAGMA foreign_keys = ON')
+    c.execute('''create table if not exists points
+    (id integer primary key autoincrement, points real not null, tag text not null, log_id integer, date text not null, foreign key (log_id) references immersion(id) on delete cascade)''')
 
 def log_deletion():
     conn, c = db_connection()
@@ -98,6 +106,7 @@ def log_deletion():
     chosen_id = int(input("enter the id you would like to remove"))
     print(f"deleting log: {chosen_id}")
     c.execute('delete from immersion where id = ?', (chosen_id,))
+    c.execute('delete from points where log_id = ?', (chosen_id,))
     #the variable from python has to be a tuple
 
     conn.commit()
@@ -116,13 +125,21 @@ def log_update():
 def insert_into_table(media_type:str, title:str, duration:float, details:str, link:str,notes:str):
     conn, c = db_connection()
     date = datetime.today().strftime('%Y-%m-%d')
+    points = scoring(duration,media_type)
+    
+    tag = "immersion"
+
     c.execute('''insert into immersion (media_type, title, duration, detail, date, link, notes) values (?,?,?,?,?,?,?)''',(media_type,title,duration,details,date,link,notes))
+    log_id = c.lastrowid
+    #takes the last id from the previous log and assigns to variable log_id
+    c.execute('''insert into points (points, tag, log_id,date) values (?,?,?,?)''',(points,tag,log_id,date))
     conn.commit()
 
 def main():
-    conn = db_connection()
+    conn, c = db_connection()
     #prompts db_connection() to connect to the database
     create_table()
+    create_points_table()
     conn.close()
     #close the cursor/closes the db connection
 if __name__ == "__main__":
