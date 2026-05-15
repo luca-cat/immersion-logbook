@@ -1,6 +1,6 @@
 import typer
 from typing import Optional
-from database import insert_into_table, display_logs, log_deletion, scoring
+from database import insert_into_table, log_deletion, scoring
 from tablecreation import print_table
 
 app = typer.Typer()

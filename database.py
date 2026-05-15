@@ -92,13 +92,6 @@ def create_table():
     #commits changes//saves changes
     conn.commit()
 
-def display_logs():
-    conn, c = db_connection()
-    c.execute('select * from immersion')
-    
-    for row in c.fetchall():
-        print(row)
-
 def log_deletion():
     conn, c = db_connection()
 
@@ -127,7 +120,7 @@ def insert_into_table(media_type:str, title:str, duration:float, details:str, li
     conn.commit()
 
 def main():
-    conn, c = db_connection()
+    conn = db_connection()
     #prompts db_connection() to connect to the database
     create_table()
     conn.close()
