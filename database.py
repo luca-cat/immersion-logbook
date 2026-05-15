@@ -23,6 +23,12 @@ def scoring(duration: float,media_type: str):
         "anki":2
     }
 
+    personalised_multipliers = {
+        "listening":None,
+        "reading":None,
+        "anki":None
+    }
+
     uranai_multipliers = {
         "listening":None,
         "reading": None,
@@ -32,15 +38,33 @@ def scoring(duration: float,media_type: str):
     for key in media_tags:
         if media_type == key:
             print(f"{key}:{media_tags[key]}")
+            
             type = media_tags[key]
 
             for category in default_multipliers:
-                if type == category:
-                    multiplier = default_multipliers[category]
-                    modified_points = unmodified_earned_points * multiplier
-                    print(f"the multiplier is {multiplier}x")
-                    print(f"points earned: {modified_points}")
+                if type != "listening":
+                #checks if the string "type" is not listening (should be "reading")    
+                    if category == type :
+                        characters_read = int(input("how many characters did you read?\n"))
+                        multiplier = default_multipliers[category]
+                        #takes the multiplier from the default_multipliers dictionary based off of the iterated category
+                        characters_multiplier = 1+(characters_read/10000)
+                        #formula for the read characters multiplier
+                        new_multiplier = characters_multiplier*multiplier
 
+                        modified_points = unmodified_earned_points * new_multiplier
+
+                        print(f"the reading multiplier is {characters_multiplier}x and the base multiplier is {multiplier}x")
+                        print(f"therefore the new multiplier is {new_multiplier}x")
+                        print(f"points earned: {modified_points:.2f}points")
+                        #prints points as two decimal places as it makes output cleaner
+                else:
+                    if type == category:
+                        multiplier = default_multipliers[category]
+                        modified_points = unmodified_earned_points * multiplier
+                        print(f"the multiplier is {multiplier}x")
+                        print(f"points earned: {modified_points:.2f}points")
+                            
                     
 
 def uranai_multipliers():
@@ -49,11 +73,16 @@ def uranai_multipliers():
 
 def db_connection():
     load_dotenv()
+    #reads the .env file
     DB_PATH = os.getenv("DB_PATH")
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    return conn, c
+    #takes DB_PATH from .env and sets it to variable DB_PATH
 
+    conn = sqlite3.connect(DB_PATH)
+    #connects to the database
+    c = conn.cursor()
+    #creates an sql cursor which allows for reading and writing of DB
+    return conn, c
+    #returns so that when a database related function is called it allows for connection to DB and modifying of DB
 
 def create_table():
     conn, c = db_connection()
@@ -99,10 +128,10 @@ def insert_into_table(media_type:str, title:str, duration:float, details:str, li
 
 def main():
     conn, c = db_connection()
+    #prompts db_connection() to connect to the database
     create_table()
     conn.close()
     #close the cursor/closes the db connection
-
 if __name__ == "__main__":
     main()
 

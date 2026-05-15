@@ -21,7 +21,10 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         link_str = f"{link} if" if link else ""
         #if notes contains a value then notes_str equal to string, else it equals none
         
-        media_type, title, details, notes = map(str.lower,[media_type,title,details,notes])
+        media_type, title = map(str.lower,[media_type,title])
+        
+        if details or notes != None:
+            details, notes = map(str.lower,[details,notes])
 
         insert_into_table(media_type, title, duration, details, link, notes)
         print(f"logged {media_type} {title} {detail_str}{duration}m{notes_str}. {link_str}")
