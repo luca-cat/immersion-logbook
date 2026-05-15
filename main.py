@@ -1,6 +1,6 @@
 import typer
 from typing import Optional
-from database import insert_into_table, log_deletion
+from database import insert_into_table, log_deletion, total_points
 from tablecreation import print_table
 
 app = typer.Typer()
@@ -15,22 +15,37 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         print(MEDIA_TYPES)
     
     else: 
-        detail_str = f"{details}" if details else ""
-        notes_str = f":{notes}" if notes else ""
-        link_str = f"{link} if" if link else ""
+        detail_str = details if details else ""
+        notes_str = notes if notes else ""
+        link_str = link if link else ""
         #if notes contains a value then notes_str equal to string, else it equals none
-        
         media_type, title = map(str.lower,[media_type,title])
 
         insert_into_table(media_type, title, duration, details, link, notes)
-        print(f"logged {media_type} {title} {detail_str}{duration}m for a time of {notes_str}. {link_str}")
+        
+        print(f"logged {media_type} {title} {detail_str} for a time of {duration}m")
+
+        if link_str and notes_str:
+            print(f"additional notes: {notes_str}")
+            print(f"URL: {link_str}")
+        elif link_str:
+            print(f"additional notes: {link_str}")
+        elif notes_str:
+            print(f"URL: {notes_str}")
+        
+        print(total_points())
+
+@app.command()
+def points():
+    points = total_points()
+    print(f"total points: {points}")
 
 @app.command()
 def setup():
     pass
 
 @app.command()
-def show_table():
+def table():
     print_table()
 
 @app.command()

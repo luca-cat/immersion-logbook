@@ -69,7 +69,11 @@ def scoring(duration: float,media_type: str):
                             
                     
 
+
 def uranai_multipliers():
+    pass
+
+def uranai():
     pass
 
 
@@ -99,6 +103,15 @@ def create_points_table():
     c.execute('PRAGMA foreign_keys = ON')
     c.execute('''create table if not exists points
     (id integer primary key autoincrement, points real not null, tag text not null, log_id integer, date text not null, foreign key (log_id) references immersion(id) on delete cascade)''')
+
+def total_points():
+    conn, c = db_connection()
+    sum_points = "select sum(points) from points"
+    c.execute(sum_points)
+    
+    sum_points = c.fetchone()[0]
+    c.close()
+    return sum_points
 
 def log_deletion():
     conn, c = db_connection()
