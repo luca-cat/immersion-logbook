@@ -45,7 +45,7 @@ def scoring(duration: float,media_type: str):
                 if type != "listening":
                 #checks if the string "type" is not listening (should be "reading")    
                     if category == type :
-                        characters_read = int(input("how many characters did you read?\n"))
+                        characters_read = int(input("how many characters did you read? (if characters not tracked enter 0)\n"))
                         multiplier = default_multipliers[category]
                         #takes the multiplier from the default_multipliers dictionary based off of the iterated category
                         characters_multiplier = 1+(characters_read/10000)

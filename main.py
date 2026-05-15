@@ -33,12 +33,13 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         elif notes_str:
             print(f"URL: {notes_str}")
         
-        print(total_points())
+        points = total_points()
+        print(f"total points: {points:.1f}")
 
 @app.command()
 def points():
     points = total_points()
-    print(f"total points: {points}")
+    print(f"total points: {points:.1f}")
 
 @app.command()
 def setup():
