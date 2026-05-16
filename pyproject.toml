@@ -5,9 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "immersion"
 version = "0.1.0"
+dependencies = [
+    "dotenv>=0.9.9",
+    "typer>=0.25.1",
+]
 
 [project.scripts]
 immersion = "main:app"
 
 [tool.setuptools]
 py-modules = ["main", "database", "tablecreation"]
+
+[dependency-groups]
+dev = [
+    "isort>=8.0.1",
+    "ruff>=0.15.13",
+]
