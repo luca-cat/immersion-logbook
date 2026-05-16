@@ -6,7 +6,9 @@ from datetime import datetime
 def scoring(duration: float,media_type: str):
     points_per_minute = 1/30
     unmodified_earned_points = points_per_minute * duration
-    
+
+    # Nitpick: i recommend using ENUMs for the media tag types
+    # and also maybe use frozendicts for the multipliers since they shouldn't be changing
     media_tags = {
         "youtube":"listening",
         "movie":"listening",
@@ -41,6 +43,8 @@ def scoring(duration: float,media_type: str):
             
             type = media_tags[key]
 
+            # Couldn't you use default_multipliers[type] instead of iterating through the dictionary again?
+            # I find this code a bit hard to read/understand what it's doin to be honest!
             for category in default_multipliers:
                 if type != "listening":
                 #checks if the string "type" is not listening (should be "reading")    
@@ -83,6 +87,8 @@ def db_connection():
     DB_PATH = os.getenv("DB_PATH")
     #takes DB_PATH from .env and sets it to variable DB_PATH
 
+    # You should be checking that this isn't None
+    # and showing an error if it is
     conn = sqlite3.connect(DB_PATH)
     #connects to the database
     c = conn.cursor()
@@ -156,5 +162,9 @@ def main():
     conn.close()
     #close the cursor/closes the db connection
 if __name__ == "__main__":
+    # This won't work though, because your users would be running
+    # main.py, not database.py. You should move this code to main.py.
+    # I also recommend implementing some sort of migration management
+    # later on but it's probably fine for now.
     main()
 
