@@ -40,32 +40,40 @@ def scoring(duration: float,media_type: str):
             print(f"{key}:{media_tags[key]}")
             
             type = media_tags[key]
-
-            for category in default_multipliers:
-                if type != "listening":
-                #checks if the string "type" is not listening (should be "reading")    
-                    if category == type :
+            #if type = media_tags[youtube] (type = listening)
+            #therefore, default_multipliers[type] = 1
+            
+            base_multiplier = default_multipliers[type]
+            
+            if type != "listening":
+            #checks if the string "type" is not listening (should be "reading")    
+                    try:
                         characters_read = int(input("how many characters did you read? (if characters not tracked enter 0)\n"))
-                        multiplier = default_multipliers[category]
-                        #takes the multiplier from the default_multipliers dictionary based off of the iterated category
-                        characters_multiplier = 1+(characters_read/10000)
-                        #formula for the read characters multiplier
-                        new_multiplier = characters_multiplier*multiplier
+                    except ValueError:
+                        print("you have inputted something invalid so it has been set to 0")
+                        characters_read = 0
+                    
+                    if characters_read < 0:
+                        print("can't be less than 0")
+                        characters_read = 0
+                
+                    #takes the multiplier from the default_multipliers dictionary based off of the iterated category
+                    characters_multiplier = 1+(characters_read/10000)
+                    #formula for the read characters multiplier
+                    reading_based_multiplier = characters_multiplier*base_multiplier
 
-                        modified_points = unmodified_earned_points * new_multiplier
+                    modified_points = unmodified_earned_points * reading_based_multiplier
 
-                        print(f"the reading multiplier is {characters_multiplier}x and the base multiplier is {multiplier}x")
-                        print(f"therefore the new multiplier is {new_multiplier}x")
-                        print(f"points earned: {modified_points:.2f}points")
-                        #prints points as two decimal places as it makes output cleaner
-                        return modified_points
-                else:
-                    if type == category:
-                        multiplier = default_multipliers[category]
-                        modified_points = unmodified_earned_points * multiplier
-                        print(f"the multiplier is {multiplier}x")
-                        print(f"points earned: {modified_points:.2f}points")
-                        return modified_points
+                    print(f"the reading multiplier is {characters_multiplier}x and the base multiplier is {base_multiplier}x")
+                    print(f"therefore the new multiplier is {reading_based_multiplier}x")
+                    print(f"points earned: {modified_points:.2f}points")
+                    #prints points as two decimal places as it makes output cleaner
+                    return modified_points
+            else:
+                modified_points = unmodified_earned_points * base_multiplier
+                print(f"the multiplier is {base_multiplier}x")
+                print(f"points earned: {modified_points:.2f}points")
+                return modified_points
                             
                     
 
@@ -80,15 +88,22 @@ def uranai():
 def db_connection():
     load_dotenv()
     #reads the .env file
-    DB_PATH = os.getenv("DB_PATH")
+    try:
+        DB_PATH = os.getenv("DB_PATH")
+
     #takes DB_PATH from .env and sets it to variable DB_PATH
 
-    conn = sqlite3.connect(DB_PATH)
-    #connects to the database
-    c = conn.cursor()
-    #creates an sql cursor which allows for reading and writing of DB
-    return conn, c
-    #returns so that when a database related function is called it allows for connection to DB and modifying of DB
+        conn = sqlite3.connect(DB_PATH)
+
+
+        #connects to the database
+        c = conn.cursor()
+        #creates an sql cursor which allows for reading and writing of DB
+        return conn, c
+        #returns so that when a database related function is called it allows for connection to DB and modifying of DB
+
+    except Exception:
+        print("\ndatabase not found\n")
 
 def create_table():
     conn, c = db_connection()
