@@ -3,6 +3,9 @@ from typing import Optional
 from database import insert_into_table, log_deletion, total_points
 from tablecreation import print_table
 
+def youtube_get_info(link: str,time_watched: int):
+    pass
+
 app = typer.Typer()
 
 MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "ln", "vn", "manga")
