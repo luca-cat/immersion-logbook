@@ -17,11 +17,6 @@ class Media(SQLModel, table=True):
     notes: Optional[str] = None
     #index=True creates an SQL index for column, allows for fast lookups
 
-class Points(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    points: float = Field(default=None, index=True)
-    log_id: int = Field(default=None, index=True)
-    date: str = Field(index=True)
 
 sqlite_file_name = 'testlogs.db'
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -40,6 +35,8 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+app = FastAPI()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
@@ -54,9 +51,3 @@ def create_log(log: Media, session: SessionDep) -> Media:
     session.commit()
     session.refresh(log)
     return log
-
-@app.get("/logs/")
-def get_logs(session: SessionDep) -> list[Media]:
-    logs = session.exec(select(Media)).all()
-    return logs
-

@@ -1,7 +1,35 @@
 import typer
 from typing import Optional
-from database import insert_into_table, log_deletion, total_points
-from tablecreation import print_table
+from sqlmodel import Session
+from database import engine, Media
+from datetime import datetime
+
+def media_data_inserter(media_type:str,title:str,duration:float, notes: Optional[str] = None, details: Optional[str] = None, link: Optional[str] = None):
+    with Session(engine) as session:
+            media = Media(
+                mediatype=media_type,
+                title=title,
+                duration=duration,
+                date=datetime.today().strftime('%Y-%m-%d')
+                notes=notes
+                details=details
+                link=link)
+            session.add(media)
+            session.commit()
+
+def points_data_inserter():
+    with Session(engine) as session:
+            media = Points(
+                mediatype=media_type,
+                title=title,
+                duration=duration,
+                date=datetime.today().strftime('%Y-%m-%d')
+                notes=notes
+                details=details
+                link=link)
+            session.add(media)
+            session.commit()
+
 
 def youtube_get_info(link: str,time_watched: int):
     pass
@@ -23,8 +51,7 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         link_str = link if link else ""
         #if notes contains a value then notes_str equal to string, else it equals none
         media_type, title = map(str.lower,[media_type,title])
-
-        insert_into_table(media_type, title, duration, details, link, notes)
+        media_data_inserter(media_type,title,duration,detail_str,notes_str,link_str)
         
         print(f"logged {media_type} {title} {detail_str} for a time of {duration}m")
 
@@ -36,13 +63,12 @@ def log(media_type: str, title: str, duration: float, notes: Optional[str] = Non
         elif notes_str:
             print(f"URL: {notes_str}")
         
-        points = total_points()
-        print(f"total points: {points:.1f}")
+        
+       
 
 @app.command()
 def points():
-    points = total_points()
-    print(f"total points: {points:.1f}")
+    pass
 
 @app.command()
 def setup():
@@ -50,11 +76,11 @@ def setup():
 
 @app.command()
 def table():
-    print_table()
+    pass
 
 @app.command()
 def dl():
-    log_deletion()
+    pass
 
 @app.command()
 def update_log():
