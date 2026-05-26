@@ -12,7 +12,7 @@ class Media(SQLModel, table=True):
     title: str = Field(index=True)
     season: Optional[int] = None
     characters: Optional[int] = None
-    duration: Optional[float] = None
+    duration: float = Field(index=True)
     episode: Optional[int] = None
     date: str = Field(index=True)
     #index=True creates an SQL index for column, allows for fast lookups

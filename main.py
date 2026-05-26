@@ -36,7 +36,7 @@ def points_data_inserter(tag: str, points: float, date: str, log_id: int | None 
             session.add(point)
             session.commit()
 
-def media_data_inserter(media_type:str,title:str,duration:Optional[float] = None, season: Optional[int] = None, episode: Optional[str] = None, characters: Optional[int] = None):
+def media_data_inserter(media_type:str,title:str,duration:float, season: Optional[int] = None, episode: Optional[str] = None, characters: Optional[int] = None):
 
     date = datetime.today().strftime('%Y-%m-%d')
     
@@ -60,10 +60,10 @@ def media_data_inserter(media_type:str,title:str,duration:Optional[float] = None
         time_based_points = time_based_scoring(duration)
         points_data_inserter("immersion", time_based_points, date, log_id=media_id)
 
-    else:
-        reading_based_points = characters_read_based_scoring(characters,duration)
-        points_data_inserter("immersion", reading_based_points, date, log_id=media_id)
 
+    else:
+        reading_based_points = characters_read_based_scoring(characters)
+        points_data_inserter("immersion", reading_based_points, date, log_id=media_id)
 
 
 def youtube_get_info(link: str,time_watched: int):
@@ -75,7 +75,7 @@ create_db_and_tables()
 MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "book", "physicalbook","vn", "manga")
 
 @app.command()
-def log(media_type: str, title: str):
+def log(media_type: str, title: str, duration: float):
 
     if media_type not in MEDIA_TYPES:
         print("not a valid media type")
@@ -85,18 +85,18 @@ def log(media_type: str, title: str):
         
         episode = int(input("enter episode number: "))
         season = int(input("enter season number: "))
-        duration = float(input("enter time watched: "))
 
         media_type, title = map(str.lower,[media_type,title])
         media_data_inserter(media_type,title,duration,episode,season)
-        print(f"logged {media_type} {title} Season {season} Episode {episode} for a time of {duration}m")   
+        points = time_based_scoring(duration)
+        print(f"\nlogged {media_type} {title} Season {season} Episode {episode}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")   
         
     elif media_type in ("book", "vn"):
 
         characters = int(input("enter character numbers read: "))
-        duration = float(input("enter time read: "))
         media_data_inserter(media_type,title, duration,characters=characters)
-
+        points = characters_read_based_scoring(characters)
+        print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
        
 
 @app.command()
