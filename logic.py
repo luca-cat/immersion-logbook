@@ -151,14 +151,6 @@ def uranai_multipliers():
 def uranai():
     pass
 
-def total_points():
-    conn, c = db_connection()
-    sum_points = "select sum(points) from points"
-    c.execute(sum_points)
-    
-    sum_points = c.fetchone()[0]
-    c.close()
-    return sum_points
 
 def log_update():
     pass

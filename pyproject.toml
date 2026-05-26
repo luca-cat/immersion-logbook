@@ -10,4 +10,4 @@ version = "0.1.0"
 immersion = "main:app"
 
 [tool.setuptools]
-py-modules = ["main", "database", "tablecreation"]
+py-modules = ["main", "database", "logic", "tablecreation"]

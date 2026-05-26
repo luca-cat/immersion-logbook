@@ -1,34 +1,42 @@
 import typer
 from typing import Optional
 from sqlmodel import Session
-from database import engine, Media
+from database import engine, Media, Points, create_db_and_tables
 from datetime import datetime
+from logic import scoring
+
+
+def points_data_inserter(tag: str, points: float, media_type: str, date: str):
+    
+    with Session(engine) as session:
+            point = Points(
+                points=points,
+                tag=tag,
+                date=datetime.today().strftime('%Y-%m-%d')
+            )
+            session.add(point)
+            session.commit()
 
 def media_data_inserter(media_type:str,title:str,duration:float, notes: Optional[str] = None, details: Optional[str] = None, link: Optional[str] = None):
+
+    date = datetime.today().strftime('%Y-%m-%d')
+    
     with Session(engine) as session:
             media = Media(
                 mediatype=media_type,
                 title=title,
                 duration=duration,
-                date=datetime.today().strftime('%Y-%m-%d')
-                notes=notes
-                details=details
+                date=date,
+                notes=notes,
+                details=details,
                 link=link)
             session.add(media)
             session.commit()
+    
+    
+    points = scoring(duration,media_type)
+    points_data_inserter("immersion", points, media_type, date)
 
-def points_data_inserter():
-    with Session(engine) as session:
-            media = Points(
-                mediatype=media_type,
-                title=title,
-                duration=duration,
-                date=datetime.today().strftime('%Y-%m-%d')
-                notes=notes
-                details=details
-                link=link)
-            session.add(media)
-            session.commit()
 
 
 def youtube_get_info(link: str,time_watched: int):
@@ -41,6 +49,8 @@ MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "ln", "vn", "manga")
 @app.command()
 def log(media_type: str, title: str, duration: float, notes: Optional[str] = None, details: Optional[str] = None, link: Optional[str] = None):
     
+    create_db_and_tables()
+
     if media_type not in MEDIA_TYPES:
         print("not a valid media type")
         print(MEDIA_TYPES)
