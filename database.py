@@ -3,18 +3,18 @@ from typing import Optional
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationship
 from contextlib import asynccontextmanager
-
+from sqlalchemy import event
 
 
 class Media(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     mediatype: str = Field(index=True)
     title: str = Field(index=True)
-    duration: float = Field(default=None, index=True)
-    detail: Optional[str] = None
+    season: Optional[int] = None
+    characters: Optional[int] = None
+    duration: Optional[float] = None
+    episode: Optional[int] = None
     date: str = Field(index=True)
-    link: Optional[str] = None
-    notes: Optional[str] = None
     #index=True creates an SQL index for column, allows for fast lookups
     points: list["Points"] = Relationship(back_populates="media", cascade_delete=True)
 
@@ -33,6 +33,12 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 connect_args = {"check_same_thread": False}
 #allows fastapi to use sqlite in different threads
 engine = create_engine(sqlite_url, connect_args=connect_args)
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 def create_db_and_tables():
@@ -77,7 +83,7 @@ def get_points(session: SessionDep) -> list[Points]:
     return points
 
 @app.delete("/logs/{id}")
-def delete_log(log_id: int, session: SessionDep):
+def delete_log(id: int, session: SessionDep):
     id = session.get(Media, id)
     if not id:
         raise HTTPException(status_code=404, detail="log not found")
