@@ -5,6 +5,7 @@ from sqlmodel import Session, select, func
 from database import engine, Media, Points, create_db_and_tables
 from logic import *
 from datetime import datetime, timedelta
+from tablecreation import print_all_table, print_anime
 
 def get_points():
     with Session(engine) as session:
@@ -221,7 +222,14 @@ def setup():
 
 @app.command()
 def table():
-    pass
+    print_all_table()
+    points()
+
+
+@app.command()
+def animetable():
+    print_anime()
+    points()
 
 @app.command()
 def dl():

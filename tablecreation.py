@@ -1,25 +1,60 @@
 from rich.console import Console
 from rich.table import Table
-from database import fetch_all
+from sqlmodel import Session, select, func
+from database import engine, Media, Points, create_db_and_tables
 
-def print_table():
-    starter_colour = "#ff0404"
-    ranks = {"beginner":"#ff0404",
-            "intermediate":"pink",}
-    #ranks work in progress
+
+def table_customisation(starter_colour, fields):
 
     table = Table(title="immersion history", show_lines=True)
-    args = ('id','mediatype', 'title', 'duration', 'detail', 'date')
 
-    for arg in args:
-        table.add_column(arg, justify="left",style=starter_colour, overflow="fold")
+    for field in fields:
+        table.add_column(field, justify="left",style=starter_colour, overflow="fold")
 
-    theme = {}
+    return table
 
-    for row in fetch_all():
-        table.add_row(str(row[0]),str(row[1]), str(row[2]), f"{row[3]}m", "" if row[4] is None else str(row[4]), str(row[5]))
+
+def select_logs():
+
+    with Session(engine) as session:
+        statement = select(Media)
+        results = session.exec(statement)
+        logs = results.all()
+        return logs
+
+def print_anime():
+    starter_colour = "#1104ff"
+    fields = ('id','mediatype', 'title','season','episode', 'date')
+    table = table_customisation(starter_colour, fields)
+    with Session(engine) as session:
+        statement = select(Media).where(Media.mediatype == "anime")
+        results = session.exec(statement)
+        logs = results.all()
+    
+    for row in logs:
+        table.add_row(str(row.id),row.mediatype,row.title,str(row.season),str(row.episode),row.date)
+
 
     console = Console()
     console.print(table)
 
+def print_all_table():
+    
+    starter_colour = "#ff0404"
+    fields = ('id','mediatype','title','duration','season','episode','characters','date')
 
+    table = table_customisation(starter_colour, fields)
+
+    for row in select_logs():
+        
+        table.add_row(str(row.id),
+                        row.mediatype, 
+                        row.title, 
+                        str(row.duration) if row.duration else "",
+                        str(row.season) if row.season else "", 
+                        str(row.episode) if row.episode else"",
+                        str(row.characters) if row.characters else "",
+                        row.date) 
+
+    console = Console()
+    console.print(table)
