@@ -23,6 +23,7 @@ def today_finished_new_cards():
         "version":6,
         "params": {
             "query": "introduced:1"
+            #introduced means new card completed
         }
 
     }
@@ -37,6 +38,7 @@ def today_finished_new_cards():
     #takes the json request and creates a dictionary
 
     card_num = len(anki_cards_dict['result'])
+    #counts number of new_cards completed today
 
     return card_num
 
@@ -46,7 +48,6 @@ def remove_anki_points():
 
     date_format_example = "YYYY-MM-DD"
 
-    
     date = input(f"enter a date to input with the format {date_format_example}:\n")
 
     with Session(engine) as session:
@@ -55,6 +56,7 @@ def remove_anki_points():
         
         try:
             points = results.one()
+            #if date + anki tag are present it does not return None
             if points != None:
                 print("Deleting anki points at date: ", date)
                 session.delete(points)
@@ -80,6 +82,7 @@ def anki_point_calculation():
         results = session.exec(statement)
         
         is_present = results.first()
+        #checks if date is present, anki tagged and in points database. 
         
         if is_present != None:
             print("Points already earned today.\nCome back tomorrow ;)")
