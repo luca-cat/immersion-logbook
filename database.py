@@ -1,9 +1,12 @@
+import os
+from dotenv import load_dotenv
 from typing import Annotated
 from typing import Optional
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationship
 from contextlib import asynccontextmanager
 from sqlalchemy import event
+
 
 
 class Media(SQLModel, table=True):
@@ -27,7 +30,8 @@ class Points(SQLModel, table=True):
 
     media: Optional[Media] = Relationship(back_populates="points")
 
-sqlite_file_name = 'logs.db'
+load_dotenv()
+sqlite_file_name = os.getenv("DB_PATH")
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}

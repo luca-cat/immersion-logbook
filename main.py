@@ -7,6 +7,7 @@ from logic import *
 from datetime import datetime, timedelta
 from tablecreation import print_all_table, print_anime
 
+
 def get_points():
     with Session(engine) as session:
         statement = select(func.sum(Points.points))

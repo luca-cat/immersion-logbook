@@ -6,7 +6,7 @@ from database import engine, Media, Points, create_db_and_tables
 
 def table_customisation(starter_colour, fields):
 
-    table = Table(title="immersion history", show_lines=True)
+    table = Table(title="immersion history", show_lines=True,width=100, expand=False)
 
     for field in fields:
         table.add_column(field, justify="left",style=starter_colour, overflow="fold")
