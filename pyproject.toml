@@ -5,6 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "immersion"
 version = "0.1.0"
+dependencies = [
+    "typer",
+    "rich",
+    "python-dotenv",
+    "requests",
+    "fastapi",
+    "sqlmodel",
+    "uvicorn",
+]
 
 [project.scripts]
 immersion = "main:app"

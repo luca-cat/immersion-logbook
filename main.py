@@ -1,9 +1,100 @@
+import requests
 import typer
 from typing import Optional
 from sqlmodel import Session, select
 from database import engine, Media, Points, create_db_and_tables
-from datetime import datetime
-from logic import characters_read_based_scoring, time_based_scoring
+from logic import *
+from datetime import datetime, timedelta
+
+def get_log_date():
+    now = datetime.now()
+    if 0 <= now.hour <=5:
+    #anki resets everyday at 5am for this reason, any logs committed during the range of 12am and 5am are counted as the previous day
+        return (now - timedelta(days=1)).strftime('%Y-%m-%d')
+    #'now.hour' takes only the hour from now variable (0-23)
+    #timedelta is simply expressing a unit of time. here it expresses one day.
+    return now.strftime('%Y-%m-%d')
+
+def today_finished_new_cards():
+
+    payload = {
+        
+        "action":"findCards",
+        "version":6,
+        "params": {
+            "query": "introduced:1"
+        }
+
+    }
+    try:
+        r = requests.post('http://127.0.0.1:8765', json=payload)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    #if any type of error is raised with the request, it stops the program and prints the error
+    #'raise' stops the program deliberately
+
+    anki_cards_dict = r.json()
+    #takes the json request and creates a dictionary
+
+    card_num = len(anki_cards_dict['result'])
+
+    return card_num
+
+
+
+def remove_anki_points():
+
+    date_format_example = "YYYY-MM-DD"
+
+    
+    date = input(f"enter a date to input with the format {date_format_example}:\n")
+
+    with Session(engine) as session:
+        statement = select(Points).where(Points.tag == "anki").where(Points.date == date)
+        results = session.exec(statement)
+        
+        try:
+            points = results.one()
+            if points != None:
+                print("Deleting anki points at date: ", date)
+                session.delete(points)
+                session.commit()
+        except:
+            print("row not found")
+
+
+def anki_point_calculation():
+    set_card_number = 10
+    #set this for how many cards you want to complete per day
+
+    points_per_card = 0.1
+
+    total_points = set_card_number * points_per_card
+
+    new_cards = today_finished_new_cards()
+
+    date = get_log_date()
+
+    with Session(engine) as session:
+        statement = select(Points).where(Points.tag == "anki").where(Points.date == date)
+        results = session.exec(statement)
+        
+        is_present = results.first()
+        
+        if is_present != None:
+            print("Points already earned today.\nCome back tomorrow ;)")
+        
+        elif is_present == None:
+            
+            if new_cards == set_card_number:
+        
+                print(f"Well done!\nuploading record to database on the date: {date}")
+                points_data_inserter("anki", total_points, date, log_id=None)
+
+
+            else:
+                print(f"{new_cards}/{set_card_number} new cards completed. keep it up! ")
+                print(f"if you complete your {set_card_number} cards you would get {total_points}points")
 
 
 def remove_log():
@@ -81,13 +172,13 @@ def log(media_type: str, title: str, duration: float):
         print("not a valid media type")
         print(MEDIA_TYPES)
     
-    if media_type == "anime":
+    if media_type in ("movie", "anime"):
         
-        episode = int(input("enter episode number: "))
         season = int(input("enter season number: "))
+        episode = int(input("enter episode number: "))
 
         media_type, title = map(str.lower,[media_type,title])
-        media_data_inserter(media_type,title,duration,episode,season)
+        media_data_inserter(media_type,title,duration,season,episode)
         points = time_based_scoring(duration)
         print(f"\nlogged {media_type} {title} Season {season} Episode {episode}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")   
         
@@ -98,6 +189,14 @@ def log(media_type: str, title: str, duration: float):
         points = characters_read_based_scoring(characters)
         print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
        
+@app.command()
+def anki():
+    anki_point_calculation()
+
+@app.command()
+def rma():
+    remove_anki_points()
+     
 
 @app.command()
 def points():

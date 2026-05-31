@@ -10,10 +10,10 @@ class Media(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     mediatype: str = Field(index=True)
     title: str = Field(index=True)
-    season: Optional[int] = None
-    characters: Optional[int] = None
     duration: float = Field(index=True)
+    season: Optional[int] = None
     episode: Optional[int] = None
+    characters: Optional[int] = None
     date: str = Field(index=True)
     #index=True creates an SQL index for column, allows for fast lookups
     points: list["Points"] = Relationship(back_populates="media", cascade_delete=True)
