@@ -1,10 +1,17 @@
 import requests
 import typer
 from typing import Optional
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from database import engine, Media, Points, create_db_and_tables
 from logic import *
 from datetime import datetime, timedelta
+
+def get_points():
+    with Session(engine) as session:
+        statement = select(func.sum(Points.points))
+        result = session.exec(statement).one()
+        
+        return result
 
 def get_log_date():
     now = datetime.now()
@@ -203,7 +210,10 @@ def rma():
 
 @app.command()
 def points():
-    pass
+    points = get_points()
+    print(f"total points: {points:.2f}")
+    rank_up = 100
+    print(f"points left until rank: {points:.2f}/{rank_up}")
 
 @app.command()
 def setup():
