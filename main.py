@@ -179,6 +179,8 @@ MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "book", "physicalbook","vn"
 
 @app.command()
 def log(media_type: str, title: str, duration: float):
+    
+    media_type, title = map(str.lower,[media_type,title])
 
     if media_type not in MEDIA_TYPES:
         print("not a valid media type")
@@ -189,7 +191,6 @@ def log(media_type: str, title: str, duration: float):
         season = int(input("enter season number: "))
         episode = int(input("enter episode number: "))
 
-        media_type, title = map(str.lower,[media_type,title])
         media_data_inserter(media_type,title,duration,season,episode)
         points = time_based_scoring(duration)
         print(f"\nlogged {media_type} {title} Season {season} Episode {episode}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")   
