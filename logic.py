@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 def characters_read_based_scoring(characters: int):
-
     character_constant = 10000
     #this constant is based on one's set difficulty 
 

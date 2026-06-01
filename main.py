@@ -198,10 +198,14 @@ def log(media_type: str, title: str, duration: float):
     elif media_type in ("book", "vn"):
 
         characters = int(input("enter character numbers read: "))
-        media_data_inserter(media_type,title, duration,characters=characters)
-        points = characters_read_based_scoring(characters)
-        print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
-       
+        if characters != 0:
+            media_data_inserter(media_type,title, duration,characters=characters)
+            points = characters_read_based_scoring(characters)
+            print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
+        else:
+            media_data_inserter(media_type,title, duration)
+            points = time_based_scoring(duration)
+            print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
 @app.command()
 def anki():
     anki_point_calculation()
