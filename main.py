@@ -1,11 +1,21 @@
 import requests
 import typer
+import subprocess
 from typing import Optional
 from sqlmodel import Session, select, func
 from database import engine, Media, Points, create_db_and_tables
 from logic import *
 from datetime import datetime, timedelta
 from tablecreation import print_all_table, print_anime
+
+app = typer.Typer()
+create_db_and_tables()
+
+MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "book", "physicalbook","vn", "manga")
+
+def show_valid_media_types():
+    for x,y in enumerate(MEDIA_TYPES, start=1):
+                print(f"{x}: {y}")
 
 
 def get_points():
@@ -75,7 +85,7 @@ def remove_anki_points():
 
 
 def anki_point_calculation():
-    set_card_number = 10
+    set_card_number = 30
     #set this for how many cards you want to complete per day
 
     points_per_card = 0.1
@@ -168,25 +178,32 @@ def media_data_inserter(media_type:str,title:str,duration:float, season: Optiona
         reading_based_points = characters_read_based_scoring(characters)
         points_data_inserter("immersion", reading_based_points, date, log_id=media_id)
 
-
-def youtube_get_info(link: str,time_watched: int):
-    pass
-
-app = typer.Typer()
-create_db_and_tables()
-
-MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "book", "physicalbook","vn", "manga")
+def youtube_get_information(link: str):
+    result = subprocess.run(
+        ["yt-dlp", "--print", "title", "--print", "duration", link],
+        capture_output=True,
+        text=True
+    )
+    lines = result.stdout.strip().split("\n")
+    title = lines[0]
+    duration = float(lines[1])/60
+    return title, duration
 
 @app.command()
 def log(media_type: str, title: str, duration: float):
     
     media_type, title = map(str.lower,[media_type,title])
-
-    if media_type not in MEDIA_TYPES:
-        print("not a valid media type")
-        print(MEDIA_TYPES)
     
-    if media_type in ("movie", "anime"):
+    try:   
+        if media_type not in MEDIA_TYPES:
+            print("not a valid media type")
+            show_valid_media_types()
+    
+    except Exception as e:
+        print(type(e).__name__, e)
+
+
+    if media_type in ("movie", "anime", "drama"):
         
         season = int(input("enter season number: "))
         episode = int(input("enter episode number: "))
@@ -206,14 +223,21 @@ def log(media_type: str, title: str, duration: float):
             media_data_inserter(media_type,title, duration)
             points = time_based_scoring(duration)
             print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
+
+@app.command()
+def mediatypes():
+    show_valid_media_types()
+#shows a list of valid loggable media types
+
 @app.command()
 def anki():
     anki_point_calculation()
+#when prompted checks if daily anki quest has been completed
 
 @app.command()
 def rma():
     remove_anki_points()
-     
+#allows for removal of daily anki quest points    
 
 @app.command()
 def points():
@@ -221,6 +245,32 @@ def points():
     print(f"total points: {points:.2f}")
     rank_up = 100
     print(f"points left until rank: {points:.2f}/{rank_up}")
+
+@app.command()
+def yt(link: str):
+    media_type = "youtube"
+    title, duration = youtube_get_information(link)
+    duration = round(duration, 2)
+    #rounds the duration to two decimal places
+    print(f"{title}, {duration:.2f}")
+    custom_duration = float(input("would you like to enter a custom duration or assume the whole length of the video?\n"))
+    
+    if custom_duration > 0:
+        duration = custom_duration
+        print(f"{title}, {duration:.2f}")
+        media_data_inserter(media_type,title,duration)
+        time_based_scoring(duration)
+    
+    else:
+        duration = duration
+        print(f"{title}, {duration:.2f}")
+        media_data_inserter(media_type,title,duration)
+        time_based_scoring(duration)
+
+
+@app.command()
+def stats():
+    print("total time immersed:\ntotal chars read:\nanime episodes watched\nmovies watched\ndramas episodes watched\nyoutube videos watched\n")
 
 @app.command()
 def setup():
@@ -242,11 +292,6 @@ def dl():
     remove_log()
 
 @app.command()
-def update_log():
-    pass
-
-
-@app.command()
 def timer():
     print("test")
 
@@ -264,6 +309,10 @@ def weeklies():
 
 @app.command()
 def monthlies():
+    pass
+
+@app.command()
+def rewards():
     pass
 
 if __name__ == "__main__":
