@@ -217,7 +217,7 @@ def log(media_type: str, title: str, duration: float):
         characters = int(input("enter character numbers read: "))
         if characters != 0:
             media_data_inserter(media_type,title, duration,characters=characters)
-            points = characters_read_based_scoring(characters)
+            points = time_based_scoring(duration)
             print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
         else:
             media_data_inserter(media_type,title, duration)
@@ -267,6 +267,27 @@ def yt(link: str):
         media_data_inserter(media_type,title,duration)
         time_based_scoring(duration)
 
+@app.command()
+def book(title: str, duration: float, start_page:int, end_page:int, total_pages_in_book:int):
+    
+    media_type = "physbook"
+
+    #assumes the first page was read along with the last page being read fully
+    total_pages_read = end_page - (start_page - 1)
+    #an average of chars based off of lots of light novels
+    average_total_chars_in_book = 130000
+
+    chars_per_page = average_total_chars_in_book / total_pages_in_book
+
+    chars_read = total_pages_read * chars_per_page
+    chars_read = round(chars_read,0)
+    
+    print(f"read {title} for a duration of {duration}m")
+    print(f"total pages read: {total_pages_read}")
+    print(f"characters read this session: {chars_read}")
+
+    media_data_inserter(media_type,title,duration, characters=chars_read)
+    time_based_scoring(duration)
 
 @app.command()
 def stats():
