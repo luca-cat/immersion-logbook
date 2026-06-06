@@ -1,3 +1,4 @@
+import re
 import requests
 import typer
 import subprocess
@@ -167,16 +168,9 @@ def media_data_inserter(media_type:str,title:str,duration:float, season: Optiona
             session.refresh(media)
             media_id = media.id
 
-    
-    if media_type not in ("book", "vn", "physicalbook"):
 
-        time_based_points = time_based_scoring(duration)
-        points_data_inserter("immersion", time_based_points, date, log_id=media_id)
-
-
-    else:
-        reading_based_points = characters_read_based_scoring(characters)
-        points_data_inserter("immersion", reading_based_points, date, log_id=media_id)
+    time_based_points = time_based_scoring(duration)
+    points_data_inserter("immersion", time_based_points, date, log_id=media_id)
 
 def youtube_get_information(link: str):
     result = subprocess.run(
@@ -288,6 +282,25 @@ def book(title: str, duration: float, start_page:int, end_page:int, total_pages_
 
     media_data_inserter(media_type,title,duration, characters=chars_read)
     time_based_scoring(duration)
+
+@app.command()
+def anime(title:str, duration:float, episode_identifier:str):
+    
+    media_type = "anime"
+
+    episode_identifier = re.findall(r'\d+', episode_identifier)
+    #finds the numbers from the episode identifier and sets episode_identifier to an array
+
+    season = episode_identifier[0]
+    episode = episode_identifier[1]
+    print(f"watched {title} for a duration of {duration}m")
+    print(f"Season: {season}")
+    print(f"Episode: {episode}")
+
+    media_data_inserter(media_type,title,duration,season,episode)
+    points = time_based_scoring(duration)
+    print(f"points earned: {points:.2f}\n")   
+        
 
 @app.command()
 def stats():
