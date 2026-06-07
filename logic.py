@@ -1,3 +1,6 @@
+
+
+
 def time_based_scoring(duration: int):
     points_per_minute = 1/60                     
 

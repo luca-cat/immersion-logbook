@@ -188,41 +188,6 @@ def youtube_get_information(link: str):
     return title, duration
 
 @app.command()
-def log(media_type: str, title: str, duration: float):
-    
-    media_type, title = map(str.lower,[media_type,title])
-    
-    try:   
-        if media_type not in MEDIA_TYPES:
-            print("not a valid media type")
-            show_valid_media_types()
-    
-    except Exception as e:
-        print(type(e).__name__, e)
-
-
-    if media_type in ("movie", "anime", "drama"):
-        
-        season = int(input("enter season number: "))
-        episode = int(input("enter episode number: "))
-
-        media_data_inserter(media_type,title,duration,season,episode)
-        points = time_based_scoring(duration)
-        print(f"\nlogged {media_type} {title} Season {season} Episode {episode}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")   
-        
-    elif media_type in ("book", "vn"):
-
-        characters = int(input("enter character numbers read: "))
-        if characters != 0:
-            media_data_inserter(media_type,title, duration,characters=characters)
-            points = time_based_scoring(duration)
-            print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
-        else:
-            media_data_inserter(media_type,title, duration)
-            points = time_based_scoring(duration)
-            print(f"\nlogged {media_type} {title}\ncharacters read: {characters}\nfor a time of {duration}m\npoints earned: {points:.2f}\n")
-
-@app.command()
 def mediatypes():
     show_valid_media_types()
 #shows a list of valid loggable media types
@@ -286,7 +251,29 @@ def book(title: str, duration: float, start_page:int, end_page:int, total_pages_
     print(f"total pages read: {total_pages_read}")
     print(f"characters read this session: {chars_read}")
 
-    media_data_inserter(media_type,title,duration, characters=chars_read)
+    media_data_inserter(media_type,title,duration,characters=chars_read)
+    print(f"points earned: {time_based_scoring(duration)}")
+
+@app.command()
+def ln(title:str, duration:float, chars_read:int):
+    
+    media_type = "ln"
+
+    print(f"read {title} for a duration of {duration}m")
+    print(f"characters read this session: {chars_read}")
+
+    media_data_inserter(media_type,title,duration,characters=chars_read)
+    print(f"points earned: {time_based_scoring(duration)}")
+
+@app.command()
+def vn(title:str, duration:float, chars_read:int):
+    
+    media_type = "vn"
+
+    print(f"read {title} for a duration of {duration}m")
+    print(f"characters read this session: {chars_read}")
+
+    media_data_inserter(media_type,title,duration,characters=chars_read)
     print(f"points earned: {time_based_scoring(duration)}")
 
 @app.command()
@@ -306,7 +293,17 @@ def anime(title:str, duration:float, episode_identifier:str):
     media_data_inserter(media_type,title,duration,season,episode)
     points = time_based_scoring(duration)
     print(f"points earned: {points:.2f}\n")   
-        
+
+@app.command()
+def movie(title:str, duration:float):
+    
+    media_type = "movie"
+
+    print(f"watched {title} for a duration of {duration}m")
+
+    media_data_inserter(media_type,title,duration,episode=1)
+    points = time_based_scoring(duration)
+    print(f"points earned: {points:.2f}\n")   
 
 @app.command()
 def stats():
