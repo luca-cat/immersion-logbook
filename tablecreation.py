@@ -1,7 +1,11 @@
+import configparser
 from rich.console import Console
 from rich.table import Table
 from sqlmodel import Session, select, func
 from database import engine, Media, Points, create_db_and_tables
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 def table_customisation(starter_colour, fields):
@@ -40,10 +44,10 @@ def print_anime():
 
 def print_all_table():
     
-    starter_colour = "#ff0404"
+    colour = config['beginner']['colour']
     fields = ('id','mediatype','title','duration','season','episode','characters','date')
 
-    table = table_customisation(starter_colour, fields)
+    table = table_customisation(colour, fields)
 
     for row in select_logs():
         

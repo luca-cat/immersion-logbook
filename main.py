@@ -2,6 +2,7 @@ import re
 import requests
 import typer
 import subprocess
+import configparser
 from typing import Optional
 from sqlmodel import Session, select, func
 from database import engine, Media, Points, create_db_and_tables
@@ -13,6 +14,9 @@ app = typer.Typer()
 create_db_and_tables()
 
 MEDIA_TYPES = ("youtube", "anime", "drama", "movie", "book", "physicalbook","vn", "manga")
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 def show_valid_media_types():
     for x,y in enumerate(MEDIA_TYPES, start=1):
@@ -86,7 +90,7 @@ def remove_anki_points():
 
 
 def anki_point_calculation():
-    set_card_number = 30
+    set_card_number = int(config['beginner']['new_cards'])
     #set this for how many cards you want to complete per day
 
     points_per_card = 0.1
@@ -253,13 +257,15 @@ def yt(link: str):
         duration = custom_duration
         print(f"{title}, {duration:.2f}")
         media_data_inserter(media_type,title,duration)
-        time_based_scoring(duration)
-    
+        
+        points_earned = time_based_scoring(duration)
+        print(points_earned)
     else:
-        duration = duration
         print(f"{title}, {duration:.2f}")
         media_data_inserter(media_type,title,duration)
-        time_based_scoring(duration)
+
+        points_earned = time_based_scoring(duration)
+        print(points_earned)
 
 @app.command()
 def book(title: str, duration: float, start_page:int, end_page:int, total_pages_in_book:int):
@@ -281,7 +287,7 @@ def book(title: str, duration: float, start_page:int, end_page:int, total_pages_
     print(f"characters read this session: {chars_read}")
 
     media_data_inserter(media_type,title,duration, characters=chars_read)
-    time_based_scoring(duration)
+    print(f"points earned: {time_based_scoring(duration)}")
 
 @app.command()
 def anime(title:str, duration:float, episode_identifier:str):
