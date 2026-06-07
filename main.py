@@ -5,7 +5,7 @@ import subprocess
 import configparser
 from typing import Optional
 from sqlmodel import Session, select, func
-from database import engine, Media, Points, create_db_and_tables
+from database import engine, Media, Points, WatchList,create_db_and_tables
 from logic import *
 from datetime import datetime, timedelta
 from tablecreation import print_all_table, print_anime
@@ -141,6 +141,17 @@ def remove_log():
     except Exception as e:
         print(type(e).__name__, e)
 
+def watchlist_add(media_type: str, title:str):
+    start_date = datetime.today().strftime('%Y-%m-%d')
+    with Session(engine) as session:
+        watchlist = WatchList(
+            media_type=media_type,
+            title=title,
+            start_date=start_date
+        )
+        session.add(watchlist)
+        session.commit()
+        session.refresh(watchlist)
 
 def points_data_inserter(tag: str, points: float, date: str, log_id: int | None = None):
     
@@ -306,12 +317,11 @@ def movie(title:str, duration:float):
     print(f"points earned: {points:.2f}\n")   
 
 @app.command()
-def stats():
-    print("total time immersed:\ntotal chars read:\nanime episodes watched\nmovies watched\ndramas episodes watched\nyoutube videos watched\n")
+#adds to watchlist
+def wla(media_type:str, title:str):
+    watchlist_add(media_type,title)
+    print(f"added {media_type} {title} to watchlist")
 
-@app.command()
-def setup():
-    pass
 
 @app.command()
 def table():
@@ -327,30 +337,6 @@ def animetable():
 @app.command()
 def dl():
     remove_log()
-
-@app.command()
-def timer():
-    print("test")
-
-@app.command()
-def fortune():
-    pass
-
-@app.command()
-def dailies():
-    pass
-
-@app.command()
-def weeklies():
-    pass
-
-@app.command()
-def monthlies():
-    pass
-
-@app.command()
-def rewards():
-    pass
 
 if __name__ == "__main__":
     app()

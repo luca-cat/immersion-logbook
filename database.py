@@ -7,8 +7,6 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationsh
 from contextlib import asynccontextmanager
 from sqlalchemy import event
 
-
-
 class Media(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     mediatype: str = Field(index=True)
@@ -29,6 +27,13 @@ class Points(SQLModel, table=True):
     date: str = Field(index=True)
 
     media: Optional[Media] = Relationship(back_populates="points")
+
+class WatchList(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    media_type: str = Field(index=True)
+    title: str = Field(index=True)
+    start_date: str = Field(index=True)
+
 
 load_dotenv()
 sqlite_file_name = os.getenv("DB_PATH")
@@ -85,6 +90,18 @@ def insert_points(point: Points, session: SessionDep) -> Points:
 def get_points(session: SessionDep) -> list[Points]:
     points = session.exec(select(Points)).all()
     return points
+
+@app.post("/watchlistentries/")
+def insert_new_entry(entry: WatchList, session: SessionDep) -> WatchList:
+    session.add(entry)
+    session.commit()
+    session.refresh(entry)
+    return entry
+
+@app.get("watchlistentries/")
+def get_entries(session: SessionDep) -> list[WatchList]:
+    entries = session.exec(select(WatchList)).all()
+    return entries
 
 @app.delete("/logs/{id}")
 def delete_log(id: int, session: SessionDep):
