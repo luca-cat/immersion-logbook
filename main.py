@@ -227,21 +227,10 @@ def yt(link: str):
     duration = round(duration, 2)
     #rounds the duration to two decimal places
     print(f"{title}, {duration:.2f}")
-    custom_duration = float(input("would you like to enter a custom duration or assume the whole length of the video?\n"))
-    
-    if custom_duration > 0:
-        duration = custom_duration
-        print(f"{title}, {duration:.2f}")
-        media_data_inserter(media_type,title,duration)
-        
-        points_earned = time_based_scoring(duration)
-        print(points_earned)
-    else:
-        print(f"{title}, {duration:.2f}")
-        media_data_inserter(media_type,title,duration)
+    media_data_inserter(media_type,title,duration)
 
-        points_earned = time_based_scoring(duration)
-        print(points_earned)
+    points_earned = time_based_scoring(duration)
+    print(points_earned)
 
 @app.command()
 def book(title: str, duration: float, start_page:int, end_page:int, total_pages_in_book:int):

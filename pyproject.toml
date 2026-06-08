@@ -20,3 +20,6 @@ immersion = "main:app"
 
 [tool.setuptools]
 py-modules = ["main", "database", "logic", "tablecreation"]
+
+[tool.setuptools.package-data]
+"*" = ["config.ini"]
