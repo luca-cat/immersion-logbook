@@ -111,7 +111,7 @@ def anki_point_calculation():
         if is_present != None:
             print("Points already earned today.\nCome back tomorrow ;)")
         
-        elif is_present == None:
+        else:
             
             if new_cards == set_card_number:
         
@@ -224,13 +224,46 @@ def points():
 def yt(link: str):
     media_type = "youtube"
     title, duration = youtube_get_information(link)
-    duration = round(duration, 2)
+    original_duration = round(duration, 2)
     #rounds the duration to two decimal places
-    print(f"{title}, {duration:.2f}")
-    media_data_inserter(media_type,title,duration)
 
-    points_earned = time_based_scoring(duration)
-    print(points_earned)
+    
+    while True:
+        custom_watched = input("did you watch all the video? all/some ")
+
+        if custom_watched == "all":
+            print(f"logged video: {title}\nwith a duration of: {original_duration:.2f}mins")
+            media_data_inserter(media_type,title,original_duration)
+
+            points_earned = time_based_scoring(original_duration)
+            print(f"points earned: {points_earned}")
+            
+            break
+        
+        elif custom_watched == "some":
+
+            while True:
+                duration = input("enter how much you watched")
+                
+                if duration > original_duration:
+                    print("cannot be more than the original length")
+                    continue
+
+                try:
+                    duration = float(duration)
+                    print(f"logged video: {title}\nwith a duration of: {duration:.2f}mins")
+                    media_data_inserter(media_type,title,duration)
+
+                    points_earned = time_based_scoring(duration)
+                    print(f"points earned: {points_earned}")
+                    break
+                
+                except ValueError:
+                    print("not a valid number")
+                
+
+
+
 
 @app.command()
 def book(title: str, duration: float, start_page:int, end_page:int, total_pages_in_book:int):
