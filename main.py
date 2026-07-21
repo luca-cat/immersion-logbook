@@ -77,15 +77,13 @@ def remove_anki_points():
     with Session(engine) as session:
         statement = select(Points).where(Points.tag == "anki").where(Points.date == date)
         results = session.exec(statement)
-        
-        try:
-            points = results.one()
+        points = results.one_or_none()
             #if date + anki tag are present it does not return None
-            if points != None:
-                print("Deleting anki points at date: ", date)
-                session.delete(points)
-                session.commit()
-        except:
+        if points is not None:
+            print("Deleting anki points at date: ", date)
+            session.delete(points)
+            session.commit()
+        else:
             print("row not found")
 
 
@@ -127,19 +125,26 @@ def anki_point_calculation():
 def remove_log():
     try: 
         id_choice = int(input("enter a log you'd like to remove: "))
+
+    except ValueError:
+        print("not a valid value")
+
+    else:
         with Session(engine) as session:
+            
             statement = select(Media).where(Media.id == id_choice)
             results = session.exec(statement)
-            id_choice = results.one()
             
-            print("deleting id: \n", id_choice)
+            existing_log = results.one_or_none()
 
-            session.delete(id_choice)
-            session.commit()
-        
+            if existing_log is None:
+                print(f"row {id_choice} not found")
+            
+            else:
+                print(f"deleting {id_choice}")
 
-    except Exception as e:
-        print(type(e).__name__, e)
+                session.delete(existing_log)
+                session.commit()
 
 def watchlist_add(media_type: str, title:str):
     start_date = datetime.today().strftime('%Y-%m-%d')
@@ -188,11 +193,13 @@ def media_data_inserter(media_type:str,title:str,duration:float, season: Optiona
     points_data_inserter("immersion", time_based_points, date, log_id=media_id)
 
 def youtube_get_information(link: str):
+    
     result = subprocess.run(
         ["yt-dlp", "--print", "title", "--print", "duration", link],
         capture_output=True,
         text=True
     )
+        
     lines = result.stdout.strip().split("\n")
     title = lines[0]
     duration = float(lines[1])/60
@@ -222,45 +229,61 @@ def points():
 
 @app.command()
 def yt(link: str):
+   
     media_type = "youtube"
-    title, duration = youtube_get_information(link)
-    original_duration = round(duration, 2)
-    #rounds the duration to two decimal places
-
     
-    while True:
-        custom_watched = input("did you watch all the video? all/some ")
+    try:
+        title, duration = youtube_get_information(link)
+    
+    except IndexError:
+        print("please enter a link only")
+    
+    else:
+        original_duration = round(duration, 2)
+        #rounds the duration to two decimal places
 
-        if custom_watched == "all":
-            print(f"logged video: {title}\nwith a duration of: {original_duration:.2f}mins")
-            media_data_inserter(media_type,title,original_duration)
+        running = True
 
-            points_earned = time_based_scoring(original_duration)
-            print(f"points earned: {points_earned}")
+        while running:
+            custom_watched = input("did you watch all the video? all/some ")
+
+            if custom_watched == "all":
+                print(f"logged video: {title}\nwith a duration of: {original_duration:.2f}mins")
+                media_data_inserter(media_type,title,original_duration)
+
+                points_earned = time_based_scoring(original_duration)
+                print(f"points earned: {points_earned}")
+                
+                break
             
-            break
-        
-        elif custom_watched == "some":
+            elif custom_watched == "some":
 
-            while True:
-                duration = input("enter how much you watched")
-                
-                if duration > original_duration:
-                    print("cannot be more than the original length")
-                    continue
+                while True:
+                    
+                    try:
+                        duration = float(input("enter how much you watched in minutes\n"))
+                    
+                    except ValueError:
+                        print("not a valid number")
+                    
+                    else:
 
-                try:
-                    duration = float(duration)
-                    print(f"logged video: {title}\nwith a duration of: {duration:.2f}mins")
-                    media_data_inserter(media_type,title,duration)
+                        if duration > original_duration or duration < 0:
+                            print("invalid duration entered")
+                            continue
+                        
+                        print(f"logged video: {title}\nwith a duration of: {duration:.2f}mins")
+                        media_data_inserter(media_type,title,duration)
 
-                    points_earned = time_based_scoring(duration)
-                    print(f"points earned: {points_earned}")
-                    break
-                
-                except ValueError:
-                    print("not a valid number")
-                
+                        points_earned = time_based_scoring(duration)
+                        print(f"points earned: {points_earned}")
+                        
+                        running = False
+                        break
+                        
+            else:
+                print("not a valid choice")
+                continue
 
 
 
